@@ -1,29 +1,63 @@
 const axios = require('axios')
 const convert = require('xml-to-json-promise').xmlDataToJSON
+const jp = require('jsonpath')
 // Based on the oba api by rijkvanzanten
 
 class API {
   constructor(options) {
     // set authentication key dependent on options passed in new OBA instance
     this.key = options.key
-    console.log(this.stringify({name: 'folkert', value: 'true', hello: 'hello'}));
   }
+  // parameters will be passed to API.get as an object, so we need to turn the object into a query string
   stringify(object) {
     const keys = Object.keys(object)
     const values = Object.values(object)
     return keys.map((key, i) => `&${key}=${values[i]}`).join('')
   }
-  // endpoint: search | details | refine | schema | availability | holdings
-  // params: query parameters, check api docs for possibilities
-  get(endpoint, params = {}) {
+  // possible endpoints: search (needs a 'q' parameter) | details (needs a 'frabl' parameter) | availability (needs a 'frabl' parameter) | holdings/root (no parameters) | refine (needs a 'rctx' parameter) / index/x (where x = facet type)
+  // params: query parameters in object, check api docs for possibilities
+  async getAll(endpoint, params = {}, key) {
     const url = `https://zoeken.oba.nl/api/v1/${endpoint}/?authorization=${this.key}${this.stringify(params)}`
     console.log(url);
+    const requests = await this.getRequestFunctions(url)
     return new Promise((resolve, reject) => {
-      axios.get(url)
-        .then(res => convert(res.data))
+      axios.all(requests)
+        .then(axios.spread(async (...responses) => {
+          const json = responses.map(async (res) => convert(res.data))
+          return Promise.all(json)
+        }))
+        .then(res => res.map(obj => obj.aquabrowser.results[0].result))
+        .then(res => [].concat(...res))
+        .then(res => key ? jp.query(res, '$..' + key) : res)
         .then(res => resolve(res))
         .catch(err => reject(err))
     })
   }
+  get(endpoint, params = {}, key) {
+    const url = `https://zoeken.oba.nl/api/v1/${endpoint}/?authorization=${this.key}${this.stringify(params)}`
+    return new Promise((resolve, reject) => {
+      axios.get(url)
+        .then(res => convert(res.data))
+        .then(res => key ? jp.query(res, '$..' + key) : res)
+        .then(res => resolve(res))
+        .catch(err => reject(err))
+    })
+  }
+  getRequestFunctions(url) {
+    return new Promise((resolve, reject) => {
+      axios.get(url)
+        .then(res => convert(res.data))
+        .then(res => {
+          const promises = []
+          const maxPage = Math.ceil(res.aquabrowser.meta[0].count[0] / 20) + 1
+          for (let i = 1; i < maxPage; i++) {
+            promises.push(axios.get(`${url}&page=${i}`))
+          }
+          resolve(promises)
+        })
+        .catch(err => reject(err))
+    })
+  }
+
 }
 module.exports = API
