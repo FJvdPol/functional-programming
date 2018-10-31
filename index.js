@@ -21,12 +21,18 @@ oba.getAll('search', {
   facet: 'type(book)'
 }, 'info')
   .then(res => {
-    data.response = res
+    data.response = helper.getMainKey(res)
     console.log(res.length)
   })
   .catch(err => {
-    data.response = `${err.response.status} ${err.response.statusText}. See terminal for more details.`
-    console.log(err, err.response.status, err.response.statusText)
+    if (data.response) {
+      data.response = `${err.response.status} ${err.response.statusText}. See terminal for more details.`
+      console.log(err, err.response.status, err.response.statusText)
+    } else {
+      data.response = 'Error: check terminal for details'
+      console.log(err)
+    }
+
   })
 
 const app = express()

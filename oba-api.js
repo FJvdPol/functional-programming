@@ -29,7 +29,6 @@ class API {
           .then(res => res.map(obj => obj.aquabrowser.results[0].result))
           .then(res => [].concat(...res))
           .then(res => key ? jp.query(res, '$..' + key) : res)
-          .then(res => res.map(array => array[0]['_'] ? array[0]['_'] : array[0]))
       })
   }
   get(endpoint, params = {}, key) {

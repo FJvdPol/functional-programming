@@ -24,6 +24,8 @@ npm install
   - Welke dag van de week worden de meeste boeken toegevoegd?
   - Welke dag van de week worden de meeste boeken uitgeleend?
 2. Wat is de verhouding van talen tussen alle boeken?
+3. Van alle boekcovers, welke meest aanwezige kleur wordt het meest uitgeleend?
+4. 
 
 
 
