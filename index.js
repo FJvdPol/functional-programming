@@ -1,42 +1,37 @@
 const OBA = require('./oba-api.js')
 const helper = require('./helpers.js')
 const express = require('express')
+const jp = require('jsonpath')
 
-const tryFrabl = '5F0767EE06F360A0'
+const randomBookFrabl = '74B4F2FC98F360A7'
 require('dotenv').config()
 
+const app = express()
 const port = 3000
-const data = {
-  response: 'Loading results please check terminal for when to refresh'
-}
 const oba = new OBA({
   key: process.env.PUBLIC
 })
 
 oba.getAll('search', {
-  q: 'harry potter',
-  sort: 'title',
+  q: 'genre:sciencefiction',
   librarian: true,
   refine: true,
   facet: 'type(book)'
-}, 'info')
+})
   .then(res => {
-    data.response = helper.getMainKey(res)
-    console.log(res.length)
+    const key = ''
+    return key ? jp.query(res, '$..' + key) : res
+  })
+  .then(data => {
+    const lastTenYears = data.filter(book => book.publication[0].year[0]['_'] > 2016)
+    console.log(lastTenYears.length, data.length)
+    app.get('/', (req, res) => res.send(lastTenYears))
+    app.listen(port)
   })
   .catch(err => {
-    if (data.response) {
-      data.response = `${err.response.status} ${err.response.statusText}. See terminal for more details.`
-      console.log(err, err.response.status, err.response.statusText)
+    if (err.response) {
+      console.log(err.response.status, err.response.statusText)
     } else {
-      data.response = 'Error: check terminal for details'
       console.log(err)
     }
-
   })
-
-const app = express()
-
-app.get('/', (req, res) => res.send(data.response))
-
-app.listen(port)

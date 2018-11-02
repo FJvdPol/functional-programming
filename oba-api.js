@@ -1,6 +1,5 @@
 const axios = require('axios')
 const convert = require('xml-to-json-promise').xmlDataToJSON
-const jp = require('jsonpath')
 // Based on the oba api by rijkvanzanten
 
 class API {
@@ -14,11 +13,12 @@ class API {
     const values = Object.values(object)
     return keys.map((key, i) => `&${key}=${values[i]}`).join('')
   }
-  // possible endpoints: search (needs a 'q' parameter) | details (needs a 'frabl' parameter) | availability (needs a 'frabl' parameter) | holdings/root (no parameters) | refine (needs a 'rctx' parameter) / index/x (where x = facet type)
+  // possible endpoints: search (needs a 'q' parameter) | holdings/root (no parameters)
   // params: query parameters in object, check api docs for possibilities
+  // returns a promise resolving in an array
   getAll(endpoint, params = {}, key) {
     const url = `https://zoeken.oba.nl/api/v1/${endpoint}/?authorization=${this.key}${this.stringify(params)}`
-    console.log(url);
+    console.log(url)
     return this.getRequestFunctions(url)
       .then(requests => {
         return axios.all(requests)
@@ -28,15 +28,18 @@ class API {
           }))
           .then(res => res.map(obj => obj.aquabrowser.results[0].result))
           .then(res => [].concat(...res))
-          .then(res => key ? jp.query(res, '$..' + key) : res)
       })
   }
+  // possible endpoints: search (needs a 'q' parameter) | details (needs a 'frabl' parameter) | availability (needs a 'frabl' parameter) | holdings/root (no parameters) | refine (needs a 'rctx' parameter) | index/x (where x = facet type)
+  // params: query parameters in object, check api docs for possibilities
+  // some unknown parameters: 'q: table:schooltv' 'q: table:activetickets'
+  // returns a promise resolving in an array
   get(endpoint, params = {}, key) {
     const url = `https://zoeken.oba.nl/api/v1/${endpoint}/?authorization=${this.key}${this.stringify(params)}`
     return new Promise((resolve, reject) => {
       axios.get(url)
         .then(res => convert(res.data))
-        .then(res => key ? jp.query(res, '$..' + key) : res)
+        .then(res => res.aquabrowser.results[0].result)
         .then(res => resolve(res))
     })
   }
@@ -48,6 +51,7 @@ class API {
   getRequestFunctions(url) {
     return this.getAmountOfRequests(url).then(amount => {
       const promises = []
+      amount > 35 ? amount = 35 : false
       for (let i = 1; i < amount; i++) {
         promises.push(axios.get(`${url}&page=${i}`))
       }
