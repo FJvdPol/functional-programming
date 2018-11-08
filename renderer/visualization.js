@@ -38,7 +38,7 @@ function destructData(data){
         .key(book => book.language)
         .entries(year.values)
         .map(lang => ({...lang, total: lang.values.length}))
-        .sort((a,b) => a.key.localeCompare(b.key))
+        .sort((a,b) => b.total - a.total) // a.key.localeCompare(b.key)
         .reduce((total, lang, index) => {
           let base
           index == 0 ? base = 0 : base = total[index - 1].y[1]
@@ -74,7 +74,7 @@ function drawData(books) {
   // console.log(books.byLang);
 
 
-
+  const margin = ({top: 10, right: 10, bottom: 20, left: 40})
   const height = window.innerHeight / 1.5
   const width = window.innerWidth
   const barWidth = 30
@@ -83,14 +83,12 @@ function drawData(books) {
 
   const yScale = d3.scaleLinear()
     .domain([0, d3.max(books.most)])
-    .range([0, height])
+    .rangeRound([height - margin.bottom, margin.top])
   const xScale = d3.scaleBand()
     .domain(books.years)
-    .range([0, width])
-    .paddingInner(.3)
-    .paddingOuter(.3)
+    .range([margin.left, width - margin.right])
+    .padding(.1, 0)
 
-  margin = ({top: 10, right: 10, bottom: 20, left: 40})
   const xAxis = g => g
     .attr("transform", `translate(0,${height - margin.bottom})`)
     .call(d3.axisBottom(xScale).tickSizeOuter(0))
@@ -120,13 +118,10 @@ function drawData(books) {
       .selectAll('rect')
         .data(d => d.values).enter().append('rect') // every year in language one rect
           .attr('width', xScale.bandwidth())
-          .attr('height', d => {
-            // console.log(d)
-            return yScale(d.y[1] - d.y[0])
-          })
-          .attr('data-lang', d => d.lang)
+          .attr('height', d => yScale(d.y[0]) - yScale(d.y[1]))
+          .attr('title', d => d.lang)
           .attr('x', d => xScale(Number(d.year)))
-          .attr('y', d => height - yScale(d.y[1]) )
+          .attr('y', d => yScale(d.y[1]) )
 
   svg.append("g")
       .call(xAxis)
