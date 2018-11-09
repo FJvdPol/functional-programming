@@ -73,14 +73,17 @@ const drawData = books => {
   const gridLineColor = '#00224a'
   const axisColor = '#003a7d'
 
+  // get color between some red and green color, found here: https://beta.observablehq.com/@mbostock/d3-stacked-bar-chart
   const color = d3.scaleOrdinal()
     .domain(books.byLang)
     .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), books.byLang.length + 1).reverse())
 
+  // make grid lines
   const makeGridX = (scale) => d3.axisBottom(scale).ticks(10)
 
   const makeGridY = (scale) => d3.axisLeft(scale).ticks(10)
 
+  // Make the legend
   const legend = (chart) => {
     const g = chart
         .attr('transform', `translate(${width - margin.left - 60},${margin.top})`)
