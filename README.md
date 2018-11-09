@@ -1,7 +1,7 @@
 # Functional-programming
 
 ---
-
+![visualization](/docs/grouped.png)
 ## Description
 
 A d3.js project which visualizes the ratio of books per language per publication year in a specific book genre (data from the [OBA API](https://www.oba.nl/)).  
@@ -17,9 +17,10 @@ A d3.js project which visualizes the ratio of books per language per publication
   - [Hypothesis](#hypothesis)
   - [Necessary properties](#necessary-properties)
   - [D3](#D3)
-  - [Conclusion](#conclusion)
-- [Still to do](#still-to-do)
-- [Credits](#credits)
+- [Visualization](#visualization)
+- [Conclusion](#conclusion)
+- [To do](#to-do)
+- [Credits](#credits/links)
 
 ## Install
 
@@ -149,6 +150,10 @@ Once I was done with this, I found out that it was really hard to calculate the 
 In the end I had to rewrite most of my data mutation functions to accomodate for this issue.   
 Scaling, adding x and y axis and grid lines wasn't too hard in the end. Once you get your data structure right, d3 is pretty easy to use for bar charts.
 After I finished my first stacked bar chart I refactored it to a grouped bar chart, and render both to the browser.
+
+## Visualization
+![visualization grouped](/docs/grouped.png)
+![visualization stacked](/docs/stacked.png)
 
 ## Conclusion
 About the hypothesis: In the end my hypothesis wasn't right. I thought english would've been the most dominant originally written language in school books at the OBA, but it appears that dutch still is the most dominant original written language.    
