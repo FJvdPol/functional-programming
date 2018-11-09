@@ -4,3 +4,12 @@
 body {
   margin: 0;
 }
+.grid line {
+  stroke: #00224a;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
+.grid path {
+  stroke-width: 0;
+}

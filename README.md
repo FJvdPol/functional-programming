@@ -60,7 +60,7 @@ Hoe is de verhouding tussen Nederlandse schoolboeken en schoolboeken oorspronkel
 - Wat is de verhouding van geschreven talen in de schoolboeken per publicatiejaar?
 
 ### Benodigde variabelen
-- genre (school)
+- genre
 - publicatiejaar (2007 - 2017)
 - original-language
 
