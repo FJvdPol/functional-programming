@@ -13,30 +13,35 @@ function countKeyTotals(arr) {
 
 d3.json('data.json').then(data => destructData(data))
 
-function destructData(data){
+const destructData = data => {
   const books = {}
 
+  // group all book objects to their respective publication year
   const publication = d3.nest()
     .key(book => book.publication)
     .entries(data)
 
+  // get array of all the years in the data in string
   books.years = publication.reduce((total, year) => total.concat(Number(year.key)), [])
 
+  // get array of the amount of books per publication year
   books.most = publication.map(year => year.values.length)
 
+  // group all book objects to their language
   books.languages = d3.nest()
       .key(book => book.language)
       .entries(data)
       .reduce((total, lang) => total.concat(lang.key), [])
 
+  // group all books per language per year, calc x and y coordinate
   books.byYear = publication
     .map(year => d3.nest()
       .key(book => book.language)
-      .entries(year.values)
-      .map(lang => ({...lang, total: lang.values.length}))
+      .entries(year.values) // group by language per year
+      .map(lang => ({...lang, total: lang.values.length})) // get amount of books per language in that year
       .sort((a,b) => b.total - a.total) // a.key.localeCompare(b.key)
       .reduce((total, lang, i) => {
-        let base = i == 0 ? 0 : total[i - 1].y[1]
+        let base = i == 0 ? 0 : total[i - 1].y[1] // calc y value based on previous language in same year (they need to stack on top of eachoter)
         return total.concat({
           ...lang,
           lang: lang.key,
@@ -47,25 +52,26 @@ function destructData(data){
       }, [])
     )
 
+  // group all to languages
   books.byLang = d3.nest()
     .key(book => book.lang)
     .entries(books.byYear
       .reduce((total, cur) => total.concat(cur))
     )
+  console.log(books.byLang)
 
+  // start drawing the data
   drawData(books)
 }
 
 
-function drawData(books) {
-  const margin = ({top: 40, right: 140, bottom: 40, left: 40})
+const drawData = books => {
+  const margin = {top: 40, right: 140, bottom: 40, left: 40}
   const height = window.innerHeight / 1.5
   const width = window.innerWidth
   const bgColor = '#001630'
   const gridLineColor = '#00224a'
   const axisColor = '#003a7d'
-
-  console.log(height);
 
   const color = d3.scaleOrdinal()
     .domain(books.byLang)
@@ -103,22 +109,20 @@ function drawData(books) {
   const yScale = d3.scaleLinear()
     .domain([0, d3.max(books.most)])
     .rangeRound([height - margin.bottom, margin.top])
+
   const xScale = d3.scaleBand()
     .domain(books.years)
     .range([margin.left, width - margin.right])
-    // .padding(.1, 0)
 
   const xAxis = g => g
     .attr('transform', `translate(0,${height - margin.bottom})`)
     .attr('color', axisColor)
     .call(d3.axisBottom(xScale).tickSizeOuter(0))
-    // .call(g => g.selectAll('.domain').remove())
 
   const yAxis = g => g
     .attr('transform', `translate(${margin.left},0)`)
     .attr('color', axisColor)
     .call(d3.axisLeft(yScale).ticks(null, 's'))
-    // .call(g => g.selectAll('.domain').remove())
 
   const stackedChart = d3.select('body')
     .append('svg')
@@ -140,7 +144,6 @@ function drawData(books) {
           .tickSize(-width + margin.left + margin.right)
           .tickFormat(''))
 
-  // const stackedRect = stackedChart.selectAll('g')
   stackedChart.selectAll('.language-group')
     .attr('class', '.language-group')
     .data(books.byLang)
@@ -175,17 +178,20 @@ function drawData(books) {
 
   // grouped chart y scale
   const yScaleGroup = d3.scaleLinear()
-    .domain([0, 70])
+    .domain([0, 100])
     .rangeRound([height - margin.bottom, margin.top])
+
   // grouped chart x scale
   const xScaleGroup = d3.scaleBand()
     .domain(books.years)
     .range([margin.left, width - margin.right])
+
   // grouped chart yAxis
   const yAxisGroup = g => g
     .attr('transform', `translate(${margin.left},0)`)
     .attr('color', axisColor)
     .call(d3.axisLeft(yScaleGroup).ticks(null, 's'))
+
   // grouped chart xAxis
   const xAxisGroup = g => g
     .attr('transform', `translate(0,${height - margin.bottom})`)
@@ -213,7 +219,6 @@ function drawData(books) {
           .tickSize(-width + margin.left + margin.right)
           .tickFormat(''))
 
-  // groupedChart.selectAll('.language-group')
   groupedChart.selectAll('.language-group')
     .data(books.byLang)
     .enter().append('g') // every language one group
