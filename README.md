@@ -164,8 +164,8 @@ I also learned a lot in the process of reordering data structures, which can be 
 I learned a little bit about D3, mostly the basic functionality. The hardest part was figuring out the stack order.
 
 ## To do
-[ ] Cleaning up the code
-[ ] Adding more comments
+- [ ] Cleaning up the code
+- [ ] Adding more comments
 
 
 ## Credits/links
