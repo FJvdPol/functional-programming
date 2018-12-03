@@ -5,7 +5,7 @@
 ## Description
 
 A d3.js project which visualizes the ratio of books per language per publication year in a specific book genre (data from the [OBA API](https://www.oba.nl/)).  
-[An example](https://fjvdpol.github.io/functional-programming/renderer/).
+[An example](https://follywolly.github.io/functional-programming/renderer/).
 
 ## Table of contents
 
@@ -30,7 +30,7 @@ To install this project you need to do a few things to get up and running. Don't
 
 ```bash
 # Clone the repository
-git clone https://fjvdpol.github.io/functional-programming/renderer/
+git clone https://follywolly.github.io/functional-programming/renderer/
 
 # Change directory
 cd functional-programming
